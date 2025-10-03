@@ -8,7 +8,7 @@ class LLMService:
         self.base_url = "https://openrouter.ai/api/v1/chat/completions"
         self.model = "meta-llama/llama-4-maverick:free"
 
-    async def send_query(self, system_prompt: str, user_content: str, image_base64: str = None) -> str:
+    async def send_query(self, system_prompt: str, image_base64: str, user_content: str = None) -> str:
         """
         Создает тифлокомментарий для изображения.
 

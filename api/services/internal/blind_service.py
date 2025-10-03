@@ -3,7 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_async_session
 
-from api.utils.llm_promts import image_describe_promt, user_request_template
+from api.utils.llm_promts import (image_describe_promt, map_describe_prompt, user_request_template,
+                                  user_map_request_prompt)
 from api.services.external.llm_service import LLMService
 
 from settings import config_parameters
@@ -26,5 +27,16 @@ class BlindHelpService:
             user_content=user_content,
             image_base64=image
         )
+
+        return llm_response
+
+    async def get_user_map_position(self, image: str):
+        system_prompt = map_describe_prompt
+        user_content = user_map_request_prompt.format(image_length=len(image))
+
+        llm_response = await LLMService(
+            openrouter_api_key=config_parameters.OPENROUTER_API_KEY).send_query(system_prompt=system_prompt,
+                                                                                user_content=user_content,
+                                                                                image_base64=image)
 
         return llm_response

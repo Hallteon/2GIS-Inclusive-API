@@ -15,8 +15,8 @@ router = APIRouter(prefix='/blinds',
 logger = logging.getLogger(__name__)
 
 
-@router.post('/create_image_description', response_model=str)
-async def create_image_description(description: str = None,
+@router.post('/summary/create', response_model=str)
+async def create_image_summary(description: str = None,
                                    image: UploadFile = File(...),
                                    session: AsyncSession = Depends(get_async_session)):
     """Роут для создания контакта клиента.
@@ -43,8 +43,40 @@ async def create_image_description(description: str = None,
         raise
 
     except Exception as e:
-        logger.exception('Unexpected error in create_image_description: %s', e)
+        logger.exception('Unexpected error in create_image_summary: %s', e)
         raise HTTPException(
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail='Unexpected error while creating image description'
+        )
+
+
+@router.post('/map/position/get', response_model=str)
+async def get_map_mark_location(image: UploadFile = File(...),
+                                session: AsyncSession = Depends(get_async_session)):
+    """Роут для создания контакта клиента.
+
+    Args:
+        image (UploadFile): изображение от пользователя
+        session (AsyncSession): асинхронная сессия
+
+    Returns:
+        str: позиция маркера на карте
+    """
+
+    try:
+        contents = await image.read()
+        base64_encoded = base64.b64encode(contents).decode('utf-8')
+
+        image_description = await BlindHelpService(session=session).get_user_map_position(image=base64_encoded)
+
+        return image_description
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.exception('Unexpected error in get_map_mark_location: %s', e)
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail='Unexpected error while getting mark location'
         )

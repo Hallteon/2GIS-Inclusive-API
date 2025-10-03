@@ -29,6 +29,7 @@ async def create_image_description(description: str = None,
     Returns:
         str: тифлокомментарий от AI по изображению и описанию необходимого слепому человеку объекта
     """
+
     try:
         contents = await image.read()
         base64_encoded = base64.b64encode(contents).decode('utf-8')
@@ -47,5 +48,3 @@ async def create_image_description(description: str = None,
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
             detail='Unexpected error while creating image description'
         )
-
-

@@ -2,7 +2,7 @@ import aiohttp
 from typing import Optional
 
 
-class BlindLLMService:
+class LLMService:
     def __init__(self, openrouter_api_key: str):
         self.api_key = openrouter_api_key
         self.base_url = "https://openrouter.ai/api/v1/chat/completions"

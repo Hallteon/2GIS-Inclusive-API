@@ -1,115 +1,58 @@
 import datetime
 
+from typing import Optional, List
+
 from api.database import Base
 from sqlalchemy.orm import Mapped, relationship, mapped_column
-from sqlalchemy import (Column, Integer, String, DateTime, Date,
-                        Boolean, ForeignKey, Text, PickleType, Float)
+from sqlalchemy import (Column, Integer, String, DateTime,
+                        ForeignKey, Text, Float)
 
 
-class TrafficFine(Base):
-    __tablename__ = "traffic_fines"
-
-    id: Mapped[int] = Column(Integer, primary_key=True)
-
-    camera_fines_count: Mapped[int] = Column(Integer, default=0)
-    decisions_made_count: Mapped[int] = Column(Integer, default=0)
-    fines_imposed_sum: Mapped[int] = Column(Integer, default=0)
-    fines_collected_sum: Mapped[int] = Column(Integer, default=0)
-
-    created_date: Mapped[datetime.date] = Column(Date, default=datetime.date.today())
-
-    def __str__(self):
-        return f'Статистика по штрафам на {self.created_date.__str__()}'
-
-
-class Evacuation(Base):
-    __tablename__ = "evacuations"
+class Route(Base):
+    __tablename__ = "routes"
 
     id: Mapped[int] = Column(Integer, primary_key=True)
 
-    line_trucks_count: Mapped[int] = Column(Integer, default=0)
-    truck_trips_count: Mapped[int] = Column(Integer, default=0)
-    evacuations_count: Mapped[int] = Column(Integer, default=0)
-    revenue_sum: Mapped[int] = Column(Integer, default=0)
+    name: Mapped[Optional[str]] = Column(String, nullable=True, default=None)
+    description: Mapped[Optional[str]] = Column(Text, nullable=True, default=None)
 
-    created_date: Mapped[datetime.date] = Column(Date, default=datetime.date.today())
+    points: Mapped[List['Point']] = relationship('Point', back_populates='route')
+
+    created_datetime: Mapped[datetime.datetime] = Column(DateTime, default=datetime.datetime.now())
 
     def __str__(self):
-        return f'Статистика по эвакуациям на {self.created_date.__str__()}'
+        return f'Маршрут "{self.name}": {self.description} - {self.created_datetime}'
 
 
-class TrafficLight(Base):
-    __tablename__ = 'traffic_lights'
+class Point(Base):
+    __tablename__ = 'points'
 
     id: Mapped[int] = Column(Integer, primary_key=True)
 
-    address: Mapped[str] = Column(String, default='base_address')
-    light_type: Mapped[str] = Column(String, default='T.1')
-    created_year: Mapped[int] = Column(Integer, default=2015)
+    name: Mapped[Optional[str]] = Column(String, nullable=True, default=None)
+    description: Mapped[Optional[str]] = Column(Text, nullable=True, default=None)
+
+    latitude: Mapped[float] = Column(Float)
+    longitude: Mapped[float] = Column(Float)
+
+    route_id: Mapped[int] = mapped_column(ForeignKey('routes.id'))
+    route: Mapped['Route'] = relationship('Route', back_populates='points')
 
     def __str__(self):
-        return f'{self.address} - {self.id}, год установки - {self.created_year}'
+        return f'Точка маршрута {self.name} с долготой {self.longitude} и широтой {self.latitude}'
 
 
-class Image(Base):
-    __tablename__ = 'images'
-
-    id: Mapped[int] = Column(Integer, primary_key=True, index=True)
-    filepath = Column(String)
-
-    created_at: Mapped[datetime.datetime] = Column(DateTime, default=datetime.datetime.now())
-
-    def __str__(self):
-        return f'{self.filepath}'
-
-
-class Project(Base):
-    __tablename__ = 'projects'
+class Event(Base):
+    __tablename__ = 'events'
 
     id: Mapped[int] = Column(Integer, primary_key=True)
 
-    title: Mapped[str] = Column(String, unique=True)
-    content: Mapped[str] = Column(Text, default='base_content')
+    name: Mapped[str] = Column(String, unique=True)
+    description: Mapped[Optional[str]] = Column(Text, nullable=True, default=None)
 
-    image_id: Mapped[int] = Column(Integer, ForeignKey('images.id'), unique=True)
-    image: Mapped["Image"] = relationship("Image", backref="project")
-
-    created_at: Mapped[datetime.datetime] = Column(DateTime, default=datetime.datetime.now())
+    latitude: Mapped[float] = Column(Float)
+    longitude: Mapped[float] = Column(Float)
 
     def __str__(self):
-        return f'Проект {self.title}'
-
-
-class News(Base):
-    __tablename__ = 'news'
-
-    id: Mapped[int] = Column(Integer, primary_key=True)
-
-    title: Mapped[str] = Column(String, unique=True)
-    content: Mapped[str] = Column(Text, default='base_content')
-
-    image_id: Mapped[int] = Column(Integer, ForeignKey('images.id'), unique=True)
-    image: Mapped["Image"] = relationship("Image", backref="news")
-
-    created_at: Mapped[datetime.datetime] = Column(DateTime, default=datetime.datetime.now())
-
-    def __str__(self):
-        return f'Новость "{self.title}"'
-
-
-class Service(Base):
-    __tablename__ = "services"
-
-    id = Column(Integer, primary_key=True, index=True)
-
-    name: Mapped[str] = Column(String(200), unique=True)
-    description: Mapped[str] = Column(Text)
-    price: Mapped[float] = Column(Float)
-
-    is_active = Column(Boolean, default=True)
-
-    def __str__(self):
-        return self.name
-
-
+        return f'Мероприятие {self.name}: {self.description}'
 

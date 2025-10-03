@@ -50,4 +50,4 @@ class AdminAuth(AuthenticationBackend):
         return True
 
 
-admin_models = []
+admin_models = [PointAdmin, RouteAdmin, EventAdmin]

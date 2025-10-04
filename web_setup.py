@@ -10,7 +10,7 @@ from settings import config_parameters, is_prod
 from starlette.middleware.cors import CORSMiddleware
 
 from api.database import engine
-from api.routers.blind_routes import router
+from api.routers.global_router import router
 from admin.admin_global import AdminAuth, admin_models
 
 

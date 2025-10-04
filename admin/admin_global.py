@@ -41,7 +41,6 @@ class AdminAuth(AuthenticationBackend):
         user = request.session.get("user")
 
         if not user:
-            # Перенаправляем на страницу входа
             return RedirectResponse(
                 request.url_for("admin:login"),
                 status_code=status.HTTP_302_FOUND
@@ -50,4 +49,4 @@ class AdminAuth(AuthenticationBackend):
         return True
 
 
-admin_models = [PointAdmin, RouteAdmin, EventAdmin]
+admin_models = [PointAdmin, RouteAdmin, CategoryAdmin]

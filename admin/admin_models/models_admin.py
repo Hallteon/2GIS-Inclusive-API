@@ -10,8 +10,8 @@ class RouteAdmin(ModelView, model=Route):
     column_list = [Route.id, Route.created_datetime]
 
 
-class EventAdmin(ModelView, model=Event):
-    column_list = [Event.id, Event.name]
+class CategoryAdmin(ModelView, model=Category):
+    column_list = [Category.id, Category.name]
 
 
 # class TrafficFineAdmin(ModelView, model=TrafficFine):

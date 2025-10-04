@@ -7,8 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_async_session
 
-from models.gis_models import *
-
 
 class BaseDAO:
     __slots__ = ('_db', 'session')
@@ -26,7 +24,7 @@ class BaseDAO:
         return entity_obj
 
     async def get_all(self) -> Sequence[dict]:
-        entities_query = await self.session.execute(select(Project))
+        entities_query = await self.session.execute(select(self._db))
         entities = entities_query.scalars().all()
 
         return entities

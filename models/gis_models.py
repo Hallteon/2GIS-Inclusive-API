@@ -98,8 +98,8 @@ class Point(BaseModel):
     category_id: Mapped[int] = mapped_column(ForeignKey('categories.id'))
     category: Mapped['Category'] = relationship('Category', back_populates='points')
 
-    route_id: Mapped[int] = mapped_column(ForeignKey('routes.id'))
-    route: Mapped['Route'] = relationship('Route', back_populates='points')
+    route_id: Mapped[Optional[int]] = mapped_column(ForeignKey('routes.id'), nullable=True)
+    route: Mapped[Optional['Route']] = relationship('Route', back_populates='points')
 
     def __str__(self):
         return f'Точка маршрута {self.name} с долготой {self.longitude} и широтой {self.latitude}'
@@ -110,6 +110,7 @@ class Category(BaseModel):
 
     id: Mapped[int] = Column(Integer, primary_key=True)
     name: Mapped[str] = Column(String, unique=True)
+    point_type: Mapped[str] = Column(String, unique=True)
 
     points: Mapped[List['Point']] = relationship('Point', back_populates='category')
 

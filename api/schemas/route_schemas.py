@@ -61,7 +61,4 @@ class CategoryReadScheme(BaseModel):
     id: int = Field(None, description='Идентификатор события')
 
     name: str = Field(..., description='Название события')
-
-
-class EventCreateScheme(BaseModel):
-    name: str = Field(..., description='Название события')
+    point_type: str = Field(..., description='Тип категории')

@@ -1,4 +1,5 @@
 from typing import List
+from unicodedata import category
 
 from fastapi.params import Depends
 
@@ -20,7 +21,45 @@ class PointDAO:
         entity_query = await self.session.execute(select(self._db).filter(self._db.id == entity_id))
         entity = entity_query.scalars().first()
 
-        return entity
+        return entity.as_dict(nested={'category': True})
+
+    async def filter(self, category_id: int = None) -> List[dict]:
+        point_dicts = []
+        stmt = select(Point).options(selectinload(Point.category))
+
+        if category_id:
+            stmt = stmt.where(self._db.category_id == category_id)
+
+        result = await self.session.execute(stmt)
+        points = result.scalars().all()
+
+        for point in points:
+            point_dicts.append(point.as_dict(nested={'category': True}))
+
+        return point_dicts
+
+    async def create(self, data: dict) -> dict:
+        point_obj = self._db(**data)
+
+        self.session.add(point_obj)
+        await self.session.commit()
+
+        return point_obj.as_dict()
+
+    async def delete(self, entity_id: int) -> bool:
+        try:
+            point = await self.session.get(self._db, entity_id)
+            if not point:
+                return False
+
+            await self.session.delete(point)
+            await self.session.commit()
+
+            return True
+
+        except Exception as e:
+            await self.session.rollback()
+            raise e
 
 
 class RouteDAO:
@@ -91,8 +130,8 @@ class CategoryDAO:
         self._db = Category
         self.session = session
 
-    async def get_all_ordered(self, order_by: str = 'id') -> List[Category]:
+    async def get_all_ordered(self, order_by: str = 'id') -> List[dict]:
         stmt = select(self._db).order_by(getattr(self._db, order_by))
         result = await self.session.execute(stmt)
 
-        return list(result.scalars().all())
+        return [res.as_dict() for res in result.scalars().all()]

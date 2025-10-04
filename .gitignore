@@ -244,3 +244,7 @@ cython_debug/
 .idea
 
 */.idea
+
+static/media/*
+
+migrations/versions/*

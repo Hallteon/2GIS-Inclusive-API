@@ -32,6 +32,10 @@ class LLMConfigsModel(BaseModel):
     OPENROUTER_API_KEY: Union[str]
 
 
-class ConfigsValidator(APIConfigsModel, AdminConfigsModel,
+class WeatherConfigsModel(BaseModel):
+    VISUAL_CROSSING_API_KEY: Union[str]
+
+
+class ConfigsValidator(APIConfigsModel, AdminConfigsModel, WeatherConfigsModel,
                        PostgresDataBaseConfigsModel, LLMConfigsModel):
     pass

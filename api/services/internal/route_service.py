@@ -2,12 +2,9 @@ from typing import List
 
 from fastapi.params import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql.functions import array_agg
 
 from api.database import get_async_session
 from api.services.daos.route_daos import RouteDAO, CategoryDAO, PointDAO
-
-from models.gis_models import Route, Category
 
 
 class RouteService:

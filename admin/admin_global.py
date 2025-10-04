@@ -49,4 +49,5 @@ class AdminAuth(AuthenticationBackend):
         return True
 
 
-admin_models = [PointAdmin, RouteAdmin, CategoryAdmin]
+admin_models = [PointAdmin, RouteAdmin, CategoryAdmin,
+                OrganizationAdmin, ImageAdmin, OrganizationCategoryAdmin]

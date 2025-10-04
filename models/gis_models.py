@@ -116,3 +116,50 @@ class Category(BaseModel):
 
     def __str__(self):
         return self.name
+
+class Image(BaseModel):
+    __tablename__ = 'images'
+
+    id: Mapped[int] = Column(Integer, primary_key=True)
+
+    filepath: Mapped[str] = Column(String)
+    created_at: Mapped[datetime.datetime] = Column(DateTime, default=datetime.datetime.now())
+
+    organization: Mapped[Optional['Organization']] = relationship('Organization', back_populates='image', uselist=False)
+
+    def __str__(self):
+        return self.filepath
+
+class OrganizationCategory(BaseModel):
+    __tablename__ = 'organization_categories'
+
+    id: Mapped[int] = Column(Integer, primary_key=True)
+    name: Mapped[str] = Column(String, unique=True)
+
+    organizations: Mapped[List['Organization']] = relationship('Organization', back_populates='category')
+
+    def __str__(self):
+        return self.name
+
+
+class Organization(BaseModel):
+    __tablename__ = 'organizations'
+
+    id: Mapped[int] = Column(Integer, primary_key=True)
+
+    name: Mapped[Optional[str]] = Column(String, nullable=True, default=None)
+    description: Mapped[Optional[str]] = Column(Text, nullable=True, default=None)
+
+    latitude: Mapped[Optional[float]] = Column(Float, default=None)
+    longitude: Mapped[Optional[float]] = Column(Float, default=None)
+
+    address: Mapped[str] = Column(String)
+
+    image_id: Mapped[Optional[int]] = mapped_column(ForeignKey('images.id'), unique=True)
+    image: Mapped[Optional['Image']] = relationship("Image", back_populates="organization", uselist=False)
+
+    category_id: Mapped[int] = mapped_column(ForeignKey('organization_categories.id'))
+    category: Mapped['OrganizationCategory'] = relationship('OrganizationCategory', back_populates='organizations')
+
+    def __str__(self):
+        return f'Точка маршрута {self.name} с долготой {self.longitude} и широтой {self.latitude}'

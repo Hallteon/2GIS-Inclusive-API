@@ -22,6 +22,9 @@ class APIConfigsModel(BaseModel):
 
     STATIC_DIR: Union[str]
     SECRET_KEY: Union[str]
+    MEDIA_DIR: Union[str]
+
+    ORGANIZATION_IMAGE_DIR: Union[str]
 
     DOMAIN: Union[str]
 

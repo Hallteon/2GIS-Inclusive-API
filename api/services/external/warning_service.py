@@ -30,7 +30,7 @@ class WarningService:
         if total_snow_last_week > 500:  # 500мм за неделю
             warnings_set.add(EnvironmentWarning.SNOW_WEATHER.value)
 
-        # Анализ прогноза на ближайшие 10 часов
+        # Анализ прогноза на ближайшие 10 часов (только для текущего дня)
         await self._analyze_10_hour_forecast(weather_data, warnings_set)
 
         return list(warnings_set)
@@ -66,7 +66,7 @@ class WarningService:
         return total_snow
 
     async def _analyze_10_hour_forecast(self, weather_data: dict, warnings_set: Set[str]):
-        """Анализирует прогноз на ближайшие 10 часов"""
+        """Анализирует прогноз на ближайшие 10 часов (только для текущего дня)"""
         current_hour = datetime.now().hour
         hours_analyzed = 0
 
@@ -83,27 +83,14 @@ class WarningService:
 
                     # Анализируем только будущие часы + текущий
                     if hour_time.hour >= current_hour and hours_analyzed < 10:
-                        await self._analyze_hour_conditions(hour_data, warnings_set)
+                        await self._analyze_hour_conditions(hour_data, warnings_set, today)
                         hours_analyzed += 1
 
                 break
 
-        # Если сегодняшних часов недостаточно, берем из завтрашнего дня
-        if hours_analyzed < 10:
-            for day_data in weather_data.get('days', []):
-                day_date = datetime.fromtimestamp(day_data['datetimeEpoch']).date()
-                today = datetime.now().date()
+        # Убрана логика анализа завтрашнего дня для дождя
 
-                if day_date > today:  # Завтрашний день
-                    hours = day_data.get('hours', [])
-
-                    for hour_data in hours:
-                        if hours_analyzed < 10:
-                            await self._analyze_hour_conditions(hour_data, warnings_set)
-                            hours_analyzed += 1
-                    break
-
-    async def _analyze_hour_conditions(self, hour_data: dict, warnings_set: Set[str]):
+    async def _analyze_hour_conditions(self, hour_data: dict, warnings_set: Set[str], analysis_date: datetime.date):
         """Анализирует погодные условия для конкретного часа"""
         temp = hour_data.get('temp', 0)
         dew_point = hour_data.get('dew', temp)
@@ -111,7 +98,7 @@ class WarningService:
         precip_type = hour_data.get('preciptype', [])
         precip = hour_data.get('precip', 0)
 
-        # Проверка на дождь
+        # Проверка на дождь - только для текущего дня
         if ('rain' in conditions or
                 (precip_type and any(p in ['rain'] for p in precip_type))):
             warnings_set.add(EnvironmentWarning.RAIN_WEATHER.value)

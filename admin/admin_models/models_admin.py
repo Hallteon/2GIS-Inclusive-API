@@ -25,3 +25,11 @@ class ImageAdmin(ModelView, model=Image):
 
 class OrganizationAdmin(ModelView, model=Organization):
     column_list = [Organization.id, Organization.name]
+
+
+class EventAdmin(ModelView, model=Event):
+    column_list = [Event.id, Event.address, Event.worker]
+
+
+class EventCategoryAdmin(ModelView, model=EventCategory):
+    column_list = [EventCategory.id, EventCategory.name]

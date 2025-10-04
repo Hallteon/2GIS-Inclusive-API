@@ -5,7 +5,7 @@ from typing import Optional, List, Dict, Any, Set
 from api.database import Base
 from sqlalchemy.orm import Mapped, relationship, mapped_column
 from sqlalchemy import (Column, Integer, String, DateTime,
-                        ForeignKey, Text, Float)
+                        ForeignKey, Text, Float, JSON)
 
 
 class BaseModel(Base):
@@ -163,3 +163,38 @@ class Organization(BaseModel):
 
     def __str__(self):
         return f'Точка маршрута {self.name} с долготой {self.longitude} и широтой {self.latitude}'
+
+
+class EventCategory(BaseModel):
+    __tablename__ = 'event_categories'
+
+    id: Mapped[int] = Column(Integer, primary_key=True)
+    name: Mapped[str] = Column(String, unique=True)
+
+    events: Mapped[List['Event']] = relationship('Event', back_populates='category')
+
+    def __str__(self):
+        return self.name
+
+
+class Event(BaseModel):
+    __tablename__ = 'events'
+
+    id: Mapped[int] = Column(Integer, primary_key=True)
+
+    address: Mapped[Optional[str]] = Column(String, nullable=True)
+    comment: Mapped[Optional[str]] = Column(String, nullable=True)
+
+    start_datetime: Mapped[Optional[datetime.datetime]] = Column(DateTime, nullable=True)
+    end_datetime: Mapped[Optional[datetime.datetime]] = Column(DateTime, nullable=True)
+
+    work: Mapped[Optional[str]] = Column(Text, nullable=True)
+    worker: Mapped[Optional[str]] = Column(String, nullable=True)
+
+    geom: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)
+
+    category_id: Mapped[int] = mapped_column(ForeignKey('event_categories.id'))
+    category: Mapped['EventCategory'] = relationship('EventCategory', back_populates='events')
+
+    def __str__(self):
+        return self.name

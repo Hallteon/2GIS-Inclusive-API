@@ -17,7 +17,7 @@ class EventsCsvImporter:
     """
 
     EVENTS_CREATE = "/events/create"
-    CATEGORY_GET = "/events/get_by_name"
+    CATEGORY_GET = "/events/categories/get_by_name"
     CATEGORY_CREATE = "/events/categories/create"
 
     def __init__(
@@ -216,7 +216,7 @@ class EventsCsvImporter:
             if r.status_code == 200:
                 # Категория найдена
                 data = r.json()
-                self.log.debug("Ответ от get_by_name для '%s': %s", name, data)
+                self.log.debug("Ответ от categories/get_by_name для '%s': %s", name, data)
 
                 if isinstance(data, dict) and "id" in data:
                     category_id = data["id"]

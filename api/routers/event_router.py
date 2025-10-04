@@ -1,10 +1,9 @@
 import logging
 
-from typing import List, Optional
+from typing import List
 
 from http import HTTPStatus
 from fastapi import APIRouter, HTTPException, Depends, Query
-from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_async_session
@@ -125,8 +124,8 @@ async def create_event_category(category: EventCategoryCreateScheme,
         )
 
 
-@router.get('/get_by_name', response_model=EventCategoryReadScheme)
-async def get_event_category_by_name(name: str,
+@router.get('/categories/get_by_name', response_model=EventCategoryReadScheme)
+async def get_event_category_by_name(name: str = Query(description='Название категории'),
                                      session: AsyncSession = Depends(get_async_session)):
     """Роут для получения категории.
 
@@ -160,4 +159,34 @@ async def get_event_category_by_name(name: str,
         )
 
 
+@router.get('/list', response_model=List[EventReadScheme])
+async def get_random_events(count: int = Query(description='Количество случайных событий'),
+                            session: AsyncSession = Depends(get_async_session)):
+    """Роут для получения случайных категорий (число передается).
 
+    Args:
+        count (int): количество событий
+        session (AsyncSession): асинхронная сессия
+
+    Returns:
+        List[EventReadScheme]: схема категории
+    """
+
+    try:
+        events = await EventService(session=session).get_events_random(events_count=count)
+        event_schemes = []
+
+        for event_dict in events:
+            event_schemes.append(EventReadScheme(**event_dict))
+
+        return event_schemes
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        logger.exception('Unexpected error in get_random_events: %s', e)
+        raise HTTPException(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            detail='Unexpected error while getting events'
+        )

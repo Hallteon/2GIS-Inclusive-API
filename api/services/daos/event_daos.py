@@ -3,7 +3,7 @@ from typing import List
 from fastapi.params import Depends
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 
 from api.database import get_async_session
@@ -38,6 +38,19 @@ class EventDAO:
         await self.session.commit()
 
         return event_obj.as_dict()
+
+    async def get_random_list(self, count: int) -> List[dict]:
+        if count <= 0:
+            return []
+
+        stmt = select(self._db).options(
+            selectinload(Event.category)
+        ).order_by(func.random()).limit(count)
+
+        result = await self.session.execute(stmt)
+        events = result.scalars().all()
+
+        return [event.as_dict(nested={'category': True}) for event in events]
 
 
 class EventCategoryDAO:

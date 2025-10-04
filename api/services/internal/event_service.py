@@ -16,6 +16,11 @@ class EventService:
 
         return event_dict
 
+    async def get_events_random(self, events_count: int) -> List[dict]:
+        random_events = await EventDAO(session=self.session).get_random_list(count=events_count)
+
+        return random_events
+
     async def create_event(self, entity_data: dict) -> dict:
         event_dict = await EventDAO(session=self.session).create(data=entity_data)
 

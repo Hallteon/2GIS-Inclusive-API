@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.database import get_async_session
 
-from api.utils.llm_promts import (image_describe_promt, map_describe_prompt, user_request_template,
+from api.utils.llm_promts import (image_describe_prompt, map_describe_prompt, user_request_template,
                                   user_map_request_prompt)
 from api.services.external.llm_service import LLMService
 
@@ -15,7 +15,7 @@ class BlindHelpService:
         self.session = session
 
     async def create_description(self, image: str, description: str = None) -> str:
-        system_prompt = image_describe_promt
+        system_prompt = image_describe_prompt
         user_content = user_request_template.format(image_length=len(image),
                                                     additional_info=f"ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ ОТ ПОЛЬЗОВАТЕЛЯ: "
                                                                     f"{description}" if description else "Дополнительной информации от пользователя нет.")

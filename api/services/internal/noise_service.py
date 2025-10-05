@@ -1,16 +1,11 @@
 import json
-
+import random
 from typing import List
-
-from fastapi.params import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from api.database import get_async_session
 
 
 class NoiseService:
-    async def get_noise_points(self) -> List[dict]:
-        json_file_path = "data/noise_analysis_results.json"
+    async def get_noise_points(self, count: int) -> List[dict]:
+        json_file_path = 'data/noise_analysis_results.json'
 
         try:
             with open(json_file_path, 'r', encoding='utf-8') as file:
@@ -18,7 +13,10 @@ class NoiseService:
 
             noisy_points = [point for point in data if point.get('is_noisy') == True]
 
-            return noisy_points
+            if count >= len(noisy_points):
+                return noisy_points
+
+            return random.sample(noisy_points, count)
 
         except FileNotFoundError:
             print(f"Файл {json_file_path} не найден")

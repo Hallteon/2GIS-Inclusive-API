@@ -19,9 +19,10 @@ logger = logging.getLogger(__name__)
 
 @router.get('/points', response_model=List[dict])
 @cache_response(ttl=60 * 30)
-async def get_noise_points(session: AsyncSession = Depends(get_async_session)):
+async def get_noise_points(count: int = Query(description='Количество точек'),
+                           session: AsyncSession = Depends(get_async_session)):
     try:
-        noise_points = await NoiseService().get_noise_points()
+        noise_points = await NoiseService().get_noise_points(count=count)
 
         return noise_points
 

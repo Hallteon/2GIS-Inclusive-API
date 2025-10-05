@@ -12,10 +12,6 @@ import httpx
 
 
 class EventsCsvImporter:
-    """
-    Импортер событий из CSV в API https://2gis-bratskiy.ru.
-    """
-
     EVENTS_CREATE = "/events/create"
     CATEGORY_GET = "/events/categories/get_by_name"
     CATEGORY_CREATE = "/events/categories/create"
@@ -173,26 +169,22 @@ class EventsCsvImporter:
         """
         Возвращает id категории по имени. Если не найдена и разрешено — создает.
         """
-        # Проверяем кэш
+
         if name in self._category_cache:
             return self._category_cache[name]
 
-        # Создаем блокировку для этой категории если ее нет
         if name not in self._category_create_locks:
             self._category_create_locks[name] = asyncio.Lock()
 
         async with self._category_create_locks[name]:
-            # Проверяем кэш еще раз (на случай если другая корутина уже создала категорию)
             if name in self._category_cache:
                 return self._category_cache[name]
 
-            # 1) Пытаемся найти существующую категорию
             category_id = await self._get_category_by_name(name)
             if category_id is not None:
                 self._category_cache[name] = category_id
                 return category_id
 
-            # 2) Если не найдена и разрешено создание - создаем
             if self.create_missing_categories:
                 category_id = await self._create_category(name)
                 if category_id is not None:
@@ -209,12 +201,11 @@ class EventsCsvImporter:
         try:
             r = await self._request(
                 "GET", self.CATEGORY_GET,
-                params={"name": name},  # httpx сам закодирует параметры
+                params={"name": name},
                 expected_statuses=(200, 404)
             )
 
             if r.status_code == 200:
-                # Категория найдена
                 data = r.json()
                 self.log.debug("Ответ от categories/get_by_name для '%s': %s", name, data)
 
@@ -226,7 +217,6 @@ class EventsCsvImporter:
                 self.log.warning("Некорректный формат ответа для категории '%s': %s", name, data)
 
             elif r.status_code == 404:
-                # Категория не найдена - это нормально
                 self.log.info("Категория '%s' не найдена", name)
                 return None
 
@@ -298,13 +288,11 @@ class EventsCsvImporter:
                 if r.status_code in expected_statuses:
                     return r
 
-                # Клиентские ошибки (4xx) не ретраим
                 if 400 <= r.status_code < 500:
                     raise httpx.HTTPStatusError(
                         f"{method} {url} → {r.status_code}: {r.text}", request=None, response=r
                     )
 
-                # 5xx — попробуем ретрай
                 self.log.warning("Сервер вернул %s. Попытка %s/%s", r.status_code, attempt + 1, self.retries + 1)
 
             except (httpx.ConnectError, httpx.ReadTimeout, httpx.RemoteProtocolError, httpx.HTTPStatusError) as e:
@@ -360,7 +348,6 @@ class EventsCsvImporter:
         points: List[Dict[str, float]] = []
 
         try:
-            # Ищем координаты в формате POINT(lon lat), LINESTRING(lon lat, lon lat, ...)
             coord_pattern = r"[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?"
             coord_pairs = re.findall(rf"({coord_pattern}\s+{coord_pattern})", s)
 
@@ -444,17 +431,15 @@ def import_events_from_csv(
     return asyncio.run(_run())
 
 
-# Пример использования с реальным импортом
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     )
 
-    # Сначала протестируем с dry_run=True чтобы посмотреть payload
     print("=== DRY RUN ===")
     summary = import_events_from_csv(
-        "events.csv",
+        "data/events.csv",
         base_url="https://2gis-bratskiy.ru",
         category_column="event_type_name",
         create_missing_categories=True,
@@ -473,7 +458,7 @@ if __name__ == "__main__":
         if response.lower() in ['y', 'yes', 'да']:
             print("\n=== REAL IMPORT ===")
             summary = import_events_from_csv(
-                "events.csv",
+                "data/events.csv",
                 base_url="https://2gis-bratskiy.ru",
                 category_column="event_type_name",
                 create_missing_categories=True,

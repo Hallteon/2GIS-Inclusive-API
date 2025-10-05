@@ -39,6 +39,10 @@ class WeatherConfigsModel(BaseModel):
     VISUAL_CROSSING_API_KEY: Union[str]
 
 
+class GisConfigsModel(BaseModel):
+    GIS_API_KEY: Union[str]
+
+
 class ConfigsValidator(APIConfigsModel, AdminConfigsModel, WeatherConfigsModel,
-                       PostgresDataBaseConfigsModel, LLMConfigsModel):
+                       PostgresDataBaseConfigsModel, LLMConfigsModel, GisConfigsModel):
     pass
